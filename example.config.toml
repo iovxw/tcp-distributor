@@ -1,5 +1,16 @@
-listen = "127.0.0.1:8442"
+listen = "127.0.0.1:7443"
 
+# A simple remote config
 [[remotes]]
-ip = "104.21.32.0/19"
+ip = "1.0.0.1"
 port = 443
+
+# Another remote with multiple ports
+[[remotes]]
+ip = "1.0.0.0/24" # Add hosts by subnet is supported
+port = [443, 8443]
+
+# Combine them all
+[[remotes]]
+ip = ["1.1.1.1", "1.1.1.2", "1.0.0.0/24"]
+port = [443, 8443, 2053, 2083, 2087, 2096]
