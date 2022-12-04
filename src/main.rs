@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn do_forward(mut local_socket: TcpStream, remote_addr: SocketAddr) -> std::io::Result<()> {
     let mut remote_socket = tokio::net::TcpStream::connect(remote_addr).await?;
     let c = COUNT.fetch_add(1, Ordering::AcqRel);
-    log::debug!("connected: {}, COUNT: {}", remote_addr, c);
+    log::debug!("connected: {}, COUNT: {}", remote_addr, c + 1);
     struct Defer<T>(T)
     where
         T: FnMut();
@@ -57,7 +57,7 @@ async fn do_forward(mut local_socket: TcpStream, remote_addr: SocketAddr) -> std
     }
     let _x = Defer(|| {
         let c = COUNT.fetch_sub(1, Ordering::AcqRel);
-        log::debug!("disconnected: {}, COUNT: {}", remote_addr, c);
+        log::debug!("disconnected: {}, COUNT: {}", remote_addr, c - 1);
     });
     tokio::io::copy_bidirectional(&mut local_socket, &mut remote_socket).await?;
     Ok(())
