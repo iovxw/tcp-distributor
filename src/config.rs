@@ -16,10 +16,30 @@ pub struct Config {
 #[serde_as]
 #[derive(Deserialize, Debug)]
 struct Remote {
-    #[serde_as(as = "OneOrMany<_>")]
+    #[serde_as(as = "OneOrMany<AddrOrNet>")]
     ip: Vec<IpNet>,
     #[serde_as(as = "OneOrMany<_>")]
     port: Vec<u16>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+enum AddrOrNet {
+    IpNet(IpNet),
+    IpAddr(IpAddr),
+}
+
+impl<'de> DeserializeAs<'de, IpNet> for AddrOrNet {
+    fn deserialize_as<D>(deserializer: D) -> Result<IpNet, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let r = match AddrOrNet::deserialize(deserializer)? {
+            AddrOrNet::IpNet(x) => x,
+            AddrOrNet::IpAddr(x) => x.into(),
+        };
+        Ok(r)
+    }
 }
 
 impl Remote {
